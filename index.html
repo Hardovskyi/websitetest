@@ -301,19 +301,89 @@
       font-size: 18px;
     }
 
-    .helper-note {
-      margin-top: 24px;
-      color: var(--muted);
-      font-size: 13px;
+    .contact-panel {
+      margin-top: 28px;
+      background: var(--navy);
+      color: white;
+      padding: 22px 22px 20px;
+      border-top: 6px solid var(--orange);
+      box-shadow: 0 6px 18px rgba(8, 52, 82, 0.12);
+    }
+
+    .contact-kicker {
+      font-family: "League Spartan", Arial, sans-serif;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--aqua);
+      margin-bottom: 10px;
+    }
+
+    .contact-title {
+      font-family: "League Spartan", Arial, sans-serif;
+      font-size: 32px;
+      line-height: 1;
+      font-weight: 700;
+      margin: 0 0 10px;
+      color: white;
+    }
+
+    .contact-text {
+      margin: 0 0 16px;
+      max-width: 760px;
+      color: rgba(255,255,255,0.92);
+      font-size: 14px;
       line-height: 1.65;
-      border-top: 1px solid var(--line);
-      padding-top: 16px;
+    }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .contact-card {
+      background: rgba(255,255,255,0.08);
+      border-left: 4px solid var(--aqua);
+      padding: 14px 14px 12px;
+    }
+
+    .contact-label {
+      font-family: "League Spartan", Arial, sans-serif;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--aqua);
+      margin-bottom: 6px;
+    }
+
+    .contact-value {
+      color: white;
+      font-size: 15px;
+      line-height: 1.55;
+    }
+
+    .contact-value a {
+      color: white;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(255,255,255,0.35);
+    }
+
+    .contact-value a:hover {
+      color: var(--aqua);
+      border-bottom-color: var(--aqua);
     }
 
     code {
       background: rgba(8, 52, 82, 0.06);
       padding: 2px 6px;
       border-radius: 4px;
+    }
+
+    @media (max-width: 860px) {
+      .contact-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media (max-width: 860px) {
@@ -338,7 +408,7 @@
 <body>
   <main class="page">
     <header class="page-header">
-      <div class="eyebrow">E Pluribus Research Library</div>
+      <div class="eyebrow">Global Detroit Resource Library</div>
       <h1>All research and evidence</h1>
       <p class="intro">
         Research, reports, and practical resources on immigrant inclusion, workforce development, local economies, and thriving communities.
@@ -393,9 +463,27 @@
     <section id="list" class="list" aria-live="polite"></section>
     <nav id="pagination" class="pagination" aria-label="Pagination"></nav>
 
-    <p class="helper-note">
-      Starter prototype for GitHub Pages. Replace the sample <code>resources</code> array in the script with more entries from your spreadsheet, or convert the spreadsheet to JSON later for a cleaner workflow.
-    </p>
+    <section class="contact-panel" aria-label="Contact information">
+      <div class="contact-kicker">Contact</div>
+      <h2 class="contact-title">Need help using this library?</h2>
+      <p class="contact-text">
+        Placeholder contact section for the prototype. Replace these details with the final Global Detroit team contact, submissions email, and support information once the library is ready to launch.
+      </p>
+      <div class="contact-grid">
+        <div class="contact-card">
+          <div class="contact-label">General inquiries</div>
+          <div class="contact-value"><a href="mailto:researchlibrary@example.org">researchlibrary@example.org</a></div>
+        </div>
+        <div class="contact-card">
+          <div class="contact-label">Partnerships</div>
+          <div class="contact-value"><a href="mailto:partnerships@example.org">partnerships@example.org</a></div>
+        </div>
+        <div class="contact-card">
+          <div class="contact-label">Office hours</div>
+          <div class="contact-value">Mon–Fri<br>9:00 AM–5:00 PM EST</div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <script>
