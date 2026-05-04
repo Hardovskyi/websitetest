@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>All research and evidence</title>
+  <title>E Pluribus Resource Library</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@500;700;800&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
@@ -38,10 +38,53 @@
     .page-header {
       background: var(--navy);
       color: white;
-      padding: 26px 28px 24px;
+      padding: 24px 28px 26px;
       margin-bottom: 26px;
       border-left: 8px solid var(--orange);
       box-shadow: 0 6px 18px rgba(8, 52, 82, 0.12);
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 24px;
+      margin-bottom: 26px;
+    }
+
+    .site-brand {
+      font-family: "League Spartan", Arial, sans-serif;
+      font-size: 16px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--aqua);
+      margin: 0;
+    }
+
+    .top-nav {
+      display: flex;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .nav-tab {
+      border: 1px solid rgba(255,255,255,0.24);
+      background: transparent;
+      color: white;
+      padding: 10px 14px 9px;
+      font-family: "League Spartan", Arial, sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .nav-tab:hover,
+    .nav-tab.active {
+      background: var(--orange);
+      border-color: var(--orange);
+      color: white;
     }
 
     .eyebrow {
@@ -70,6 +113,14 @@
       color: rgba(255,255,255,0.95);
       font-size: 15px;
       line-height: 1.65;
+    }
+
+    .content-section {
+      display: none;
+    }
+
+    .content-section.active {
+      display: block;
     }
 
     .controls {
@@ -301,8 +352,39 @@
       font-size: 18px;
     }
 
+    .placeholder-page {
+      background: var(--cream);
+      border-left: 6px solid var(--orange);
+      padding: 28px 26px;
+      box-shadow: 0 6px 18px rgba(8, 52, 82, 0.08);
+    }
+
+    .placeholder-kicker {
+      font-family: "League Spartan", Arial, sans-serif;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--teal);
+      margin-bottom: 10px;
+    }
+
+    .placeholder-title {
+      margin: 0 0 12px;
+      font-family: "League Spartan", Arial, sans-serif;
+      font-size: 40px;
+      line-height: 1;
+      color: var(--navy);
+    }
+
+    .placeholder-text {
+      max-width: 720px;
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--text);
+    }
+
     .contact-panel {
-      margin-top: 28px;
       background: var(--navy);
       color: white;
       padding: 22px 22px 20px;
@@ -374,23 +456,26 @@
       border-bottom-color: var(--aqua);
     }
 
-    code {
-      background: rgba(8, 52, 82, 0.06);
-      padding: 2px 6px;
-      border-radius: 4px;
-    }
+    @media (max-width: 900px) {
+      .header-top {
+        flex-direction: column;
+        align-items: stretch;
+      }
 
-    @media (max-width: 860px) {
+      .top-nav {
+        justify-content: flex-start;
+      }
+
+      .controls {
+        grid-template-columns: 1fr;
+      }
+
       .contact-grid {
         grid-template-columns: 1fr;
       }
     }
 
     @media (max-width: 860px) {
-      .controls {
-        grid-template-columns: 1fr;
-      }
-
       .page-header {
         padding: 22px 20px 20px;
       }
@@ -402,87 +487,124 @@
       .details.open {
         max-height: 520px;
       }
+
+      .placeholder-title {
+        font-size: 34px;
+      }
     }
   </style>
 </head>
 <body>
   <main class="page">
     <header class="page-header">
-      <div class="eyebrow">Global Detroit Resource Library</div>
-      <h1>All research and evidence</h1>
-      <p class="intro">
+      <div class="header-top">
+        <p class="site-brand">E Pluribus Resource Library</p>
+        <nav class="top-nav" aria-label="Main navigation">
+          <button class="nav-tab" data-page="about">About Us</button>
+          <button class="nav-tab" data-page="events">Events</button>
+          <button class="nav-tab active" data-page="resources">Resources</button>
+          <button class="nav-tab" data-page="contact">Contact Us</button>
+        </nav>
+      </div>
+      <div class="eyebrow" id="pageEyebrow">Research Library</div>
+      <h1 id="pageTitle">All research and evidence</h1>
+      <p class="intro" id="pageIntro">
         Research, reports, and practical resources on immigrant inclusion, workforce development, local economies, and thriving communities.
       </p>
     </header>
 
-    <section class="controls" aria-label="Search and filters">
-      <div class="control">
-        <label for="searchInput">Search</label>
-        <div class="search-wrap">
-          <input id="searchInput" type="search" placeholder="Search" aria-label="Search resources" />
-          <span class="search-icon">⌕</span>
+    <section id="resourcesPage" class="content-section active" aria-label="Resources page">
+      <section class="controls" aria-label="Search and filters">
+        <div class="control">
+          <label for="searchInput">Search</label>
+          <div class="search-wrap">
+            <input id="searchInput" type="search" placeholder="Search" aria-label="Search resources" />
+            <span class="search-icon">⌕</span>
+          </div>
         </div>
+
+        <div class="control">
+          <label for="typeFilter">Type</label>
+          <div class="select-wrap">
+            <select id="typeFilter" aria-label="Filter by type">
+              <option value="">Filter by type</option>
+            </select>
+            <span class="select-icon">▼</span>
+          </div>
+        </div>
+
+        <div class="control">
+          <label for="expertiseFilter">Expertise</label>
+          <div class="select-wrap">
+            <select id="expertiseFilter" aria-label="Filter by expertise">
+              <option value="">Filter by expertise</option>
+            </select>
+            <span class="select-icon">▼</span>
+          </div>
+        </div>
+
+        <div class="control">
+          <label for="authorFilter">Authors</label>
+          <div class="select-wrap">
+            <select id="authorFilter" aria-label="Authors">
+              <option value="">Authors</option>
+            </select>
+            <span class="select-icon">▼</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="results-meta">
+        <div id="resultsCount">0 results</div>
+        <div id="pageInfo"></div>
       </div>
 
-      <div class="control">
-        <label for="typeFilter">Type</label>
-        <div class="select-wrap">
-          <select id="typeFilter" aria-label="Filter by type">
-            <option value="">Filter by type</option>
-          </select>
-          <span class="select-icon">▼</span>
-        </div>
-      </div>
+      <section id="list" class="list" aria-live="polite"></section>
+      <nav id="pagination" class="pagination" aria-label="Pagination"></nav>
+    </section>
 
-      <div class="control">
-        <label for="expertiseFilter">Expertise</label>
-        <div class="select-wrap">
-          <select id="expertiseFilter" aria-label="Filter by expertise">
-            <option value="">Filter by expertise</option>
-          </select>
-          <span class="select-icon">▼</span>
-        </div>
-      </div>
-
-      <div class="control">
-        <label for="authorFilter">Authors</label>
-        <div class="select-wrap">
-          <select id="authorFilter" aria-label="Authors">
-            <option value="">Authors</option>
-          </select>
-          <span class="select-icon">▼</span>
-        </div>
+    <section id="aboutPage" class="content-section" aria-label="About us page">
+      <div class="placeholder-page">
+        <div class="placeholder-kicker">About Us</div>
+        <h2 class="placeholder-title">About Us</h2>
+        <p class="placeholder-text">
+          This page is currently a placeholder for the prototype. It can later introduce the organization, explain the purpose of the library, and describe how these resources support immigrant inclusion, economic development, and community research.
+        </p>
       </div>
     </section>
 
-    <div class="results-meta">
-      <div id="resultsCount">0 results</div>
-      <div id="pageInfo"></div>
-    </div>
-
-    <section id="list" class="list" aria-live="polite"></section>
-    <nav id="pagination" class="pagination" aria-label="Pagination"></nav>
-
-    <section class="contact-panel" aria-label="Contact information">
-      <div class="contact-kicker">Contact</div>
-      <h2 class="contact-title">Stay Up To Date</h2>
-      <p class="contact-text">
-        Placeholder contact section for the prototype. Replace these details with the final Global Detroit team contact, submissions email, and support information once the library is ready to launch.
-      </p>
-      <div class="contact-grid">
-        <div class="contact-card">
-          <div class="contact-label">General inquiries</div>
-          <div class="contact-value"><a href="mailto:researchlibrary@example.org">researchlibrary@example.org</a></div>
-        </div>
-        <div class="contact-card">
-          <div class="contact-label">Partnerships</div>
-          <div class="contact-value"><a href="mailto:partnerships@example.org">partnerships@example.org</a></div>
-        </div>
-        <div class="contact-card">
-          <div class="contact-label">Office hours</div>
-          <div class="contact-value">Mon–Fri<br>9:00 AM–5:00 PM EST</div>
-        </div>
+    <section id="eventsPage" class="content-section" aria-label="Events page">
+      <div class="placeholder-page">
+        <div class="placeholder-kicker">Events</div>
+        <h2 class="placeholder-title">Events</h2>
+        <p class="placeholder-text">
+          This page is currently a placeholder for the prototype. It can later include upcoming events, convenings, workshops, webinars, and public programs related to immigrant inclusion and community engagement.
+        </p>
       </div>
+    </section>
+
+    <section id="contactPage" class="content-section" aria-label="Contact us page">
+      <section class="contact-panel" aria-label="Contact information">
+        <div class="contact-kicker">Contact</div>
+        <h2 class="contact-title">Need help using this library?</h2>
+        <p class="contact-text">
+          Placeholder contact section for the prototype. Replace these details with the final team contact, submissions email, and support information once the library is ready to launch.
+        </p>
+        <div class="contact-grid">
+          <div class="contact-card">
+            <div class="contact-label">General inquiries</div>
+            <div class="contact-value"><a href="mailto:researchlibrary@example.org">researchlibrary@example.org</a></div>
+          </div>
+          <div class="contact-card">
+            <div class="contact-label">Partnerships</div>
+            <div class="contact-value"><a href="mailto:partnerships@example.org">partnerships@example.org</a></div>
+          </div>
+          <div class="contact-card">
+            <div class="contact-label">Office hours</div>
+            <div class="contact-value">Mon–Fri<br>9:00 AM–5:00 PM EST</div>
+          </div>
+        </div>
+      </section>
     </section>
   </main>
 
@@ -544,6 +666,29 @@
       }
     ];
 
+    const pageContent = {
+      resources: {
+        eyebrow: "Research Library",
+        title: "All research and evidence",
+        intro: "Research, reports, and practical resources on immigrant inclusion, workforce development, local economies, and thriving communities."
+      },
+      about: {
+        eyebrow: "About Us",
+        title: "About Us",
+        intro: "Learn more about the purpose of this library and the broader work supporting immigrant inclusion and thriving communities."
+      },
+      events: {
+        eyebrow: "Events",
+        title: "Events",
+        intro: "Explore future workshops, conversations, and gatherings connected to research, community engagement, and policy dialogue."
+      },
+      contact: {
+        eyebrow: "Contact",
+        title: "Contact Us",
+        intro: "Get in touch about the library, partnerships, submissions, or general questions related to this prototype."
+      }
+    };
+
     const state = {
       search: "",
       type: "",
@@ -552,6 +697,7 @@
       page: 1,
       perPage: 8,
       openKey: null,
+      activePage: "resources",
     };
 
     const searchInput = document.getElementById("searchInput");
@@ -562,6 +708,16 @@
     const pagination = document.getElementById("pagination");
     const resultsCount = document.getElementById("resultsCount");
     const pageInfo = document.getElementById("pageInfo");
+    const pageEyebrow = document.getElementById("pageEyebrow");
+    const pageTitle = document.getElementById("pageTitle");
+    const pageIntro = document.getElementById("pageIntro");
+    const navTabs = document.querySelectorAll(".nav-tab");
+    const sections = {
+      resources: document.getElementById("resourcesPage"),
+      about: document.getElementById("aboutPage"),
+      events: document.getElementById("eventsPage"),
+      contact: document.getElementById("contactPage")
+    };
 
     function uniqueValues(values) {
       return [...new Set(values)].filter(Boolean).sort((a, b) => a.localeCompare(b));
@@ -580,6 +736,22 @@
     fillSelect(typeFilter, uniqueValues(resources.map(item => item.type)), "Filter by type");
     fillSelect(expertiseFilter, uniqueValues(resources.flatMap(item => item.expertise)), "Filter by expertise");
     fillSelect(authorFilter, uniqueValues(resources.map(item => item.authors)), "Authors");
+
+    function setActivePage(page) {
+      state.activePage = page;
+      const content = pageContent[page];
+      pageEyebrow.textContent = content.eyebrow;
+      pageTitle.textContent = content.title;
+      pageIntro.textContent = content.intro;
+
+      navTabs.forEach(tab => {
+        tab.classList.toggle("active", tab.dataset.page === page);
+      });
+
+      Object.entries(sections).forEach(([key, section]) => {
+        section.classList.toggle("active", key === page);
+      });
+    }
 
     function filterResources() {
       return resources.filter(item => {
@@ -694,6 +866,12 @@
       });
     }
 
+    navTabs.forEach(tab => {
+      tab.addEventListener("click", () => {
+        setActivePage(tab.dataset.page);
+      });
+    });
+
     searchInput.addEventListener("input", e => {
       state.search = e.target.value.trim();
       state.page = 1;
@@ -722,6 +900,7 @@
       renderList();
     });
 
+    setActivePage("resources");
     renderList();
   </script>
 </body>
