@@ -34,6 +34,8 @@
       background: var(--white);
       border-bottom: 1px solid rgba(8, 52, 82, 0.08);
       box-shadow: 0 2px 10px rgba(8, 52, 82, 0.05);
+      position: relative;
+      z-index: 20;
     }
 
     .topbar-inner,
@@ -69,15 +71,19 @@
       align-items: center;
     }
 
-    .nav-tab {
+    .nav-tab,
+    .dropdown-item {
       border: none;
       background: transparent;
       color: var(--navy);
-      padding: 12px 14px 10px;
       font-family: "League Spartan", Arial, sans-serif;
       font-size: 19px;
       font-weight: 700;
       cursor: pointer;
+    }
+
+    .nav-tab {
+      padding: 12px 14px 10px;
       transition: color 0.2s ease;
       position: relative;
     }
@@ -100,6 +106,50 @@
 
     .nav-tab.active::after {
       background: var(--orange);
+    }
+
+    .nav-with-caret {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .caret {
+      font-size: 13px;
+      transform: translateY(1px);
+    }
+
+    .resources-menu {
+      position: relative;
+    }
+
+    .resource-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      min-width: 360px;
+      padding: 12px;
+      background: var(--white);
+      border: 1px solid rgba(8, 52, 82, 0.12);
+      box-shadow: 0 14px 36px rgba(8, 52, 82, 0.12);
+      display: none;
+    }
+
+    .resource-dropdown.open {
+      display: block;
+    }
+
+    .dropdown-item {
+      width: 100%;
+      text-align: left;
+      padding: 10px 12px;
+      font-size: 17px;
+      color: var(--navy);
+    }
+
+    .dropdown-item:hover {
+      background: var(--sand);
+      color: var(--orange);
     }
 
     .page {
@@ -157,10 +207,10 @@
 
     .controls {
       display: grid;
-      grid-template-columns: repeat(4, minmax(160px, 1fr));
+      grid-template-columns: repeat(3, minmax(180px, 1fr));
       gap: 18px 22px;
       align-items: end;
-      margin-bottom: 34px;
+      margin-bottom: 18px;
     }
 
     .control {
@@ -169,7 +219,8 @@
       gap: 8px;
     }
 
-    .control label {
+    .control label,
+    .subtype-label {
       font-family: "League Spartan", Arial, sans-serif;
       font-size: 15px;
       color: var(--navy);
@@ -216,6 +267,48 @@
       color: var(--aqua);
       font-size: 18px;
       font-family: Arial, sans-serif;
+    }
+
+    .subtype-panel {
+      margin-bottom: 28px;
+      display: none;
+    }
+
+    .subtype-panel.visible {
+      display: block;
+    }
+
+    .bubble-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .bubble {
+      border: 1px solid var(--line);
+      background: var(--cream);
+      color: var(--navy);
+      padding: 10px 14px 9px;
+      font-family: "League Spartan", Arial, sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .bubble:hover,
+    .bubble.active {
+      background: var(--orange);
+      border-color: var(--orange);
+      color: white;
+    }
+
+    .subtype-help {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
     }
 
     .results-meta {
@@ -299,7 +392,7 @@
     }
 
     .details.open {
-      max-height: 420px;
+      max-height: 540px;
       margin-top: 16px;
     }
 
@@ -311,7 +404,8 @@
 
     .authors,
     .expertise,
-    .summary {
+    .summary,
+    .meta-tags {
       max-width: 860px;
       color: var(--text);
       font-size: 15px;
@@ -320,7 +414,8 @@
     }
 
     .authors strong,
-    .expertise strong {
+    .expertise strong,
+    .meta-tags strong {
       color: var(--navy);
       font-weight: 700;
     }
@@ -500,6 +595,11 @@
       .controls {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
+
+      .resource-dropdown {
+        right: auto;
+        left: 0;
+      }
     }
 
     @media (max-width: 760px) {
@@ -520,7 +620,11 @@
       }
 
       .details.open {
-        max-height: 520px;
+        max-height: 640px;
+      }
+
+      .resource-dropdown {
+        min-width: 290px;
       }
     }
   </style>
@@ -530,9 +634,21 @@
     <div class="topbar-inner">
       <p class="site-brand">E Pluribus<br>Resource Library</p>
       <nav class="top-nav" aria-label="Main navigation">
-        <button class="nav-tab" data-page="about">About Us</button>
+        <button class="nav-tab active" data-page="about">About Us</button>
         <button class="nav-tab" data-page="events">Events</button>
-        <button class="nav-tab active" data-page="resources">Resources</button>
+        <div class="resources-menu">
+          <button class="nav-tab nav-with-caret" id="resourcesMenuButton" aria-expanded="false">Resources <span class="caret">▼</span></button>
+          <div class="resource-dropdown" id="resourcesDropdown">
+            <button class="dropdown-item" data-type="All Resources">All Resources</button>
+            <button class="dropdown-item" data-type="Economic Impact Areas">Economic Impact Areas</button>
+            <button class="dropdown-item" data-type="Special Populations Covered">Special Populations Covered</button>
+            <button class="dropdown-item" data-type="Demographic Analysis Included">Demographic Analysis Included</button>
+            <button class="dropdown-item" data-type="Geographic Focus of the Publication">Geographic Focus of the Publication</button>
+            <button class="dropdown-item" data-type="Publication Format">Publication Format</button>
+            <button class="dropdown-item" data-type="Use Case">Use Case</button>
+            <button class="dropdown-item" data-type="Author Type">Author Type</button>
+          </div>
+        </div>
         <button class="nav-tab" data-page="contact">Contact Us</button>
       </nav>
     </div>
@@ -540,14 +656,14 @@
 
   <main class="page">
     <header class="page-header">
-      <div class="eyebrow" id="pageEyebrow">Research Library</div>
-      <h1 id="pageTitle">All research and evidence</h1>
+      <div class="eyebrow" id="pageEyebrow">About Us</div>
+      <h1 id="pageTitle">About Us</h1>
       <p class="intro" id="pageIntro">
-        Research, reports, and practical resources on immigrant inclusion, workforce development, local economies, and thriving communities.
+        Learn more about the purpose of this library and the broader work supporting immigrant inclusion and thriving communities.
       </p>
     </header>
 
-    <section id="resourcesPage" class="content-section active" aria-label="Resources page">
+    <section id="resourcesPage" class="content-section" aria-label="Resources page">
       <section class="search-row" aria-label="Keyword search">
         <div class="control">
           <label for="searchInput">Search</label>
@@ -562,19 +678,7 @@
         <div class="control">
           <label for="typeFilter">Type</label>
           <div class="select-wrap">
-            <select id="typeFilter" aria-label="Filter by type">
-              <option value="">Filter by type</option>
-            </select>
-            <span class="select-icon">▼</span>
-          </div>
-        </div>
-
-        <div class="control">
-          <label for="expertiseFilter">Expertise</label>
-          <div class="select-wrap">
-            <select id="expertiseFilter" aria-label="Filter by expertise">
-              <option value="">Filter by expertise</option>
-            </select>
+            <select id="typeFilter" aria-label="Filter by type"></select>
             <span class="select-icon">▼</span>
           </div>
         </div>
@@ -583,7 +687,7 @@
           <label for="authorFilter">Authors</label>
           <div class="select-wrap">
             <select id="authorFilter" aria-label="Authors">
-              <option value="">Authors</option>
+              <option value="">All authors</option>
             </select>
             <span class="select-icon">▼</span>
           </div>
@@ -593,13 +697,21 @@
           <label for="sortFilter">Sort</label>
           <div class="select-wrap">
             <select id="sortFilter" aria-label="Sort resources">
-              <option value="year-desc">Sort by year</option>
+              <option value="year-desc">Sort by newest year</option>
               <option value="title-asc">Sort alphabetically</option>
               <option value="author-asc">Sort by author</option>
               <option value="year-asc">Sort by oldest year</option>
             </select>
             <span class="select-icon">▼</span>
           </div>
+        </div>
+      </section>
+
+      <section id="subtypePanel" class="subtype-panel" aria-label="Subtype filters">
+        <div class="subtype-label">Subtypes</div>
+        <div id="bubbleList" class="bubble-list"></div>
+        <div class="subtype-help">
+          Select one or multiple subtype bubbles to narrow results. If none are selected, all resources under the chosen type will be shown.
         </div>
       </section>
 
@@ -612,7 +724,7 @@
       <nav id="pagination" class="pagination" aria-label="Pagination"></nav>
     </section>
 
-    <section id="aboutPage" class="content-section" aria-label="About us page">
+    <section id="aboutPage" class="content-section active" aria-label="About us page">
       <div class="placeholder-page">
         <div class="placeholder-kicker">About Us</div>
         <h2 class="placeholder-title">About Us</h2>
@@ -658,73 +770,185 @@
   </main>
 
   <script>
+    const subtypeMap = {
+      "Economic Impact Areas": [
+        "Tax Contributions",
+        "Economic Activity or Impact",
+        "High Skilled Labor",
+        "Small Business",
+        "Start-Up / Innovation",
+        "Low-Wage Workforce",
+        "Costs of Deportation",
+        "Costs of Pausing Refugee Resettlement",
+        "Industry-Specific",
+        "Notable Contributions / Success Stories",
+        "Impact on US Born Population"
+      ],
+      "Special Populations Covered": [
+        "Refugees",
+        "International Students",
+        "Asylum / Humanitarian Entrants",
+        "TPS Holders",
+        "Undocumented"
+      ],
+      "Demographic Analysis Included": [
+        "Population Growth",
+        "Country of Origin",
+        "Ethnicity",
+        "Educational Attainment",
+        "English Proficiency"
+      ],
+      "Geographic Focus of the Publication": [
+        "National (U.S.)",
+        "Multi-State Region",
+        "State-Level",
+        "Metro / Sub-State Region",
+        "City / Local"
+      ],
+      "Publication Format": [
+        "Research Report",
+        "Program Guide",
+        "Policy Guide",
+        "Fact Sheet"
+      ],
+      "Use Case": [
+        "Business Engagement",
+        "Program Design / Best Practices",
+        "Policy Advocacy",
+        "Narrative Change / Strategy",
+        "Quick Facts",
+        "Grant Proposal Support"
+      ],
+      "Author Type": [
+        "University / Academic",
+        "Community Group / Practitioner",
+        "Business / Chamber / Econ Dev",
+        "Research Institute",
+        "Policy Advocacy Org",
+        "Government Agency"
+      ]
+    };
+
     const resources = [
       {
         title: "Immigrants in the Low-Wage Workforce",
         url: "https://www.workrisenetwork.org/working-knowledge/immigrants-low-wage-workforce",
-        type: "Research Report",
         date: "2025",
         authors: "WorkRise (Urban Institute); Hamutal Bernstein; Fernando Hernandez-Lepe",
-        expertise: ["Economic Activity or Impact", "Low-Wage Workforce", "Industry-Specific"],
         summary: "National data tool on immigrant low-wage workers shows they are overrepresented in key sectors and includes demographic analysis, charts, and policy recommendations.",
+        tags: {
+          "Economic Impact Areas": ["Economic Activity or Impact", "Low-Wage Workforce", "Industry-Specific"],
+          "Special Populations Covered": ["Refugees", "International Students", "Undocumented"],
+          "Demographic Analysis Included": ["Country of Origin", "Ethnicity", "Educational Attainment"],
+          "Geographic Focus of the Publication": ["National (U.S.)"],
+          "Publication Format": ["Research Report"],
+          "Use Case": ["Business Engagement", "Policy Advocacy"],
+          "Author Type": ["Research Institute"]
+        }
       },
       {
         title: "Building Inclusive Cities: Immigration and Neighborhood Change in Detroit",
         url: "https://globaldetroitmi.org/wp-content/uploads/2021/08/20210803-BIC-Report_Compressed.pdf",
-        type: "Research Report",
         date: "2021",
         authors: "Global Detroit; Alan Mallach; Data Driven Detroit",
-        expertise: ["Economic Activity or Impact", "Small Business", "Notable Contributions / Success Stories"],
         summary: "Detroit-focused report showing how immigrants help stabilize neighborhoods through homeownership and small business development.",
+        tags: {
+          "Economic Impact Areas": ["Economic Activity or Impact", "Small Business", "Notable Contributions / Success Stories"],
+          "Special Populations Covered": [],
+          "Demographic Analysis Included": ["Ethnicity", "Educational Attainment"],
+          "Geographic Focus of the Publication": ["City / Local", "Metro / Sub-State Region"],
+          "Publication Format": ["Research Report"],
+          "Use Case": ["Program Design / Best Practices", "Narrative Change / Strategy"],
+          "Author Type": ["Community Group / Practitioner"]
+        }
       },
       {
         title: "Toolkit: Mobilizing Against Anti-Refugee/Asylum Legislation in States",
         url: "https://www.refugeeadvocacylab.org/resources/toolkit-mobilizing-against-anti-refugee/asylum-legislation",
-        type: "Policy Guide",
         date: "2024",
         authors: "Refugee Advocacy Lab; IRAP; IRC; American Immigration Council",
-        expertise: ["Policy Advocacy", "Refugees", "Asylum / Humanitarian Entrants"],
         summary: "Advocacy toolkit to combat anti-refugee and anti-asylum state legislation, with mobilization, testimony, and messaging guidance.",
+        tags: {
+          "Economic Impact Areas": [],
+          "Special Populations Covered": ["Refugees", "Asylum / Humanitarian Entrants"],
+          "Demographic Analysis Included": [],
+          "Geographic Focus of the Publication": ["State-Level"],
+          "Publication Format": ["Policy Guide"],
+          "Use Case": ["Policy Advocacy"],
+          "Author Type": ["Policy Advocacy Org"]
+        }
       },
       {
         title: "The Red State Playbook: Opportunities for Refugee and Immigrant Inclusion and Workforce Engagement",
         url: "https://www.refugeeadvocacylab.org/resources/the-red-state-playbook",
-        type: "Policy Guide",
         date: "2025",
         authors: "Refugee Advocacy Lab; IRAP; Balqees Mihirig; Charlotte Haq",
-        expertise: ["Economic Activity or Impact", "High Skilled Labor", "Workforce Engagement"],
         summary: "Guide highlighting bipartisan and Republican-supported state actions that advance refugee and immigrant inclusion through economic and workforce strategies.",
+        tags: {
+          "Economic Impact Areas": ["Economic Activity or Impact", "High Skilled Labor"],
+          "Special Populations Covered": ["Refugees", "Asylum / Humanitarian Entrants"],
+          "Demographic Analysis Included": [],
+          "Geographic Focus of the Publication": ["State-Level", "Multi-State Region"],
+          "Publication Format": ["Policy Guide"],
+          "Use Case": ["Policy Advocacy", "Quick Facts"],
+          "Author Type": ["Policy Advocacy Org"]
+        }
       },
       {
         title: "Welcoming Economy Tracker",
         url: "https://www.example.com/welcoming-economy-tracker",
-        type: "Fact Sheet",
         date: "2023",
         authors: "Example Research Institute",
-        expertise: ["Quick Facts", "Population Growth", "Business Engagement"],
         summary: "Example placeholder entry showing how additional resources from the spreadsheet can be added to the list view.",
+        tags: {
+          "Economic Impact Areas": ["Economic Activity or Impact"],
+          "Special Populations Covered": [],
+          "Demographic Analysis Included": ["Population Growth"],
+          "Geographic Focus of the Publication": ["National (U.S.)"],
+          "Publication Format": ["Fact Sheet"],
+          "Use Case": ["Quick Facts", "Business Engagement"],
+          "Author Type": ["Research Institute"]
+        }
       },
       {
         title: "State Strategies for International Student Retention",
         url: "https://www.example.com/state-strategies-international-students",
-        type: "Program Guide",
         date: "2022",
         authors: "Example University Center",
-        expertise: ["International Students", "Program Design / Best Practices", "State-Level"],
         summary: "Example placeholder entry showing another content type and filter combination.",
+        tags: {
+          "Economic Impact Areas": [],
+          "Special Populations Covered": ["International Students"],
+          "Demographic Analysis Included": [],
+          "Geographic Focus of the Publication": ["State-Level"],
+          "Publication Format": ["Program Guide"],
+          "Use Case": ["Program Design / Best Practices"],
+          "Author Type": ["University / Academic"]
+        }
       }
     ];
 
+    const typeOptions = [
+      "All Resources",
+      "Economic Impact Areas",
+      "Special Populations Covered",
+      "Demographic Analysis Included",
+      "Geographic Focus of the Publication",
+      "Publication Format",
+      "Use Case",
+      "Author Type"
+    ];
+
     const pageContent = {
-      resources: {
-        eyebrow: "Research Library",
-        title: "All research and evidence",
-        intro: "Research, reports, and practical resources on immigrant inclusion, workforce development, local economies, and thriving communities."
-      },
       about: {
         eyebrow: "About Us",
         title: "About Us",
         intro: "Learn more about the purpose of this library and the broader work supporting immigrant inclusion and thriving communities."
+      },
+      resources: {
+        eyebrow: "Research Library",
+        title: "All research and evidence",
+        intro: "Research, reports, and practical resources on immigrant inclusion, workforce development, local economies, and thriving communities."
       },
       events: {
         eyebrow: "Events",
@@ -740,19 +964,18 @@
 
     const state = {
       search: "",
-      type: "",
-      expertise: "",
+      type: "All Resources",
+      selectedSubtypes: [],
       author: "",
       sort: "year-desc",
       page: 1,
       perPage: 8,
       openKey: null,
-      activePage: "resources",
+      activePage: "about"
     };
 
     const searchInput = document.getElementById("searchInput");
     const typeFilter = document.getElementById("typeFilter");
-    const expertiseFilter = document.getElementById("expertiseFilter");
     const authorFilter = document.getElementById("authorFilter");
     const sortFilter = document.getElementById("sortFilter");
     const list = document.getElementById("list");
@@ -762,10 +985,16 @@
     const pageEyebrow = document.getElementById("pageEyebrow");
     const pageTitle = document.getElementById("pageTitle");
     const pageIntro = document.getElementById("pageIntro");
-    const navTabs = document.querySelectorAll(".nav-tab");
+    const navTabs = document.querySelectorAll(".nav-tab[data-page]");
+    const resourcesMenuButton = document.getElementById("resourcesMenuButton");
+    const resourcesDropdown = document.getElementById("resourcesDropdown");
+    const dropdownItems = document.querySelectorAll(".dropdown-item");
+    const subtypePanel = document.getElementById("subtypePanel");
+    const bubbleList = document.getElementById("bubbleList");
+
     const sections = {
-      resources: document.getElementById("resourcesPage"),
       about: document.getElementById("aboutPage"),
+      resources: document.getElementById("resourcesPage"),
       events: document.getElementById("eventsPage"),
       contact: document.getElementById("contactPage")
     };
@@ -774,21 +1003,18 @@
       return [...new Set(values)].filter(Boolean).sort((a, b) => a.localeCompare(b));
     }
 
-    function fillSelect(select, values, defaultLabel) {
-      if (select !== sortFilter) {
-        select.innerHTML = `<option value="">${defaultLabel}</option>`;
-      }
-      values.forEach(value => {
-        const option = document.createElement("option");
-        option.value = value;
-        option.textContent = value;
-        select.appendChild(option);
-      });
+    function fillTypeFilter() {
+      typeFilter.innerHTML = typeOptions.map(option => `
+        <option value="${option}" ${option === state.type ? "selected" : ""}>${option}</option>
+      `).join("");
     }
 
-    fillSelect(typeFilter, uniqueValues(resources.map(item => item.type)), "Filter by type");
-    fillSelect(expertiseFilter, uniqueValues(resources.flatMap(item => item.expertise)), "Filter by expertise");
-    fillSelect(authorFilter, uniqueValues(resources.map(item => item.authors)), "Authors");
+    function fillAuthorFilter() {
+      const authors = uniqueValues(resources.map(item => item.authors));
+      authorFilter.innerHTML = `<option value="">All authors</option>` + authors.map(author => `
+        <option value="${author}">${author}</option>
+      `).join("");
+    }
 
     function sortResources(items) {
       const sorted = [...items];
@@ -810,23 +1036,52 @@
       return sorted;
     }
 
+    function renderSubtypeBubbles() {
+      if (state.type === "All Resources") {
+        subtypePanel.classList.remove("visible");
+        bubbleList.innerHTML = "";
+        return;
+      }
+
+      const subtypes = subtypeMap[state.type] || [];
+      subtypePanel.classList.add("visible");
+      bubbleList.innerHTML = subtypes.map(subtype => `
+        <button class="bubble ${state.selectedSubtypes.includes(subtype) ? "active" : ""}" data-subtype="${subtype}">${subtype}</button>
+      `).join("");
+
+      bubbleList.querySelectorAll(".bubble").forEach(button => {
+        button.addEventListener("click", () => {
+          const subtype = button.dataset.subtype;
+          if (state.selectedSubtypes.includes(subtype)) {
+            state.selectedSubtypes = state.selectedSubtypes.filter(item => item !== subtype);
+          } else {
+            state.selectedSubtypes = [...state.selectedSubtypes, subtype];
+          }
+          state.page = 1;
+          state.openKey = null;
+          renderSubtypeBubbles();
+          renderList();
+        });
+      });
+    }
+
     function filterResources() {
       const filtered = resources.filter(item => {
+        const allTags = Object.values(item.tags).flat();
         const haystack = [
           item.title,
           item.authors,
           item.summary,
-          item.type,
           item.date,
-          ...item.expertise,
+          ...allTags
         ].join(" ").toLowerCase();
 
         const matchesSearch = !state.search || haystack.includes(state.search.toLowerCase());
-        const matchesType = !state.type || item.type === state.type;
-        const matchesExpertise = !state.expertise || item.expertise.includes(state.expertise);
         const matchesAuthor = !state.author || item.authors === state.author;
+        const matchesType = state.type === "All Resources" || (item.tags[state.type] && item.tags[state.type].length > 0);
+        const matchesSubtype = state.type === "All Resources" || state.selectedSubtypes.length === 0 || item.tags[state.type].some(tag => state.selectedSubtypes.includes(tag));
 
-        return matchesSearch && matchesType && matchesExpertise && matchesAuthor;
+        return matchesSearch && matchesAuthor && matchesType && matchesSubtype;
       });
 
       return sortResources(filtered);
@@ -842,10 +1097,23 @@
       navTabs.forEach(tab => {
         tab.classList.toggle("active", tab.dataset.page === page);
       });
+      resourcesMenuButton.classList.toggle("active", page === "resources");
 
       Object.entries(sections).forEach(([key, section]) => {
         section.classList.toggle("active", key === page);
       });
+    }
+
+    function openResourcesWithType(type) {
+      state.type = type;
+      state.selectedSubtypes = [];
+      state.page = 1;
+      state.openKey = null;
+      fillTypeFilter();
+      renderSubtypeBubbles();
+      setActivePage("resources");
+      closeDropdown();
+      renderList();
     }
 
     function renderList() {
@@ -865,9 +1133,11 @@
         list.innerHTML = visible.map((item, index) => {
           const key = `${start + index}`;
           const isOpen = state.openKey === key;
+          const selectedTypeTags = state.type === "All Resources" ? [] : (item.tags[state.type] || []);
+          const typeLabel = state.type === "All Resources" ? (item.tags["Publication Format"]?.[0] || "Resource") : state.type;
           return `
             <article class="item">
-              <div class="type">${item.type}</div>
+              <div class="type">${typeLabel}</div>
               <button class="title-button" data-key="${key}" aria-expanded="${isOpen}">
                 <span class="title-text">${item.title}</span>
                 <span class="toggle-icon">+</span>
@@ -876,7 +1146,7 @@
               <div class="details ${isOpen ? "open" : ""}">
                 <div class="details-inner">
                   <div class="authors"><strong>Authors:</strong> ${item.authors}</div>
-                  <div class="expertise"><strong>Expertise:</strong> ${item.expertise.join(", ")}</div>
+                  ${state.type === "All Resources" ? `<div class="meta-tags"><strong>Formats:</strong> ${(item.tags["Publication Format"] || []).join(", ") || "—"}</div>` : `<div class="expertise"><strong>${state.type}:</strong> ${selectedTypeTags.length ? selectedTypeTags.join(", ") : "Not tagged in this category"}</div>`}
                   <div class="summary">${item.summary}</div>
                   <a class="resource-link" href="${item.url}" target="_blank" rel="noopener noreferrer">Open source</a>
                 </div>
@@ -940,9 +1210,34 @@
       });
     }
 
+    function closeDropdown() {
+      resourcesDropdown.classList.remove("open");
+      resourcesMenuButton.setAttribute("aria-expanded", "false");
+    }
+
+    resourcesMenuButton.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const willOpen = !resourcesDropdown.classList.contains("open");
+      resourcesDropdown.classList.toggle("open", willOpen);
+      resourcesMenuButton.setAttribute("aria-expanded", willOpen ? "true" : "false");
+    });
+
+    dropdownItems.forEach(button => {
+      button.addEventListener("click", () => {
+        openResourcesWithType(button.dataset.type);
+      });
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!event.target.closest(".resources-menu")) {
+        closeDropdown();
+      }
+    });
+
     navTabs.forEach(tab => {
       tab.addEventListener("click", () => {
         setActivePage(tab.dataset.page);
+        closeDropdown();
       });
     });
 
@@ -955,15 +1250,10 @@
 
     typeFilter.addEventListener("change", e => {
       state.type = e.target.value;
+      state.selectedSubtypes = [];
       state.page = 1;
       state.openKey = null;
-      renderList();
-    });
-
-    expertiseFilter.addEventListener("change", e => {
-      state.expertise = e.target.value;
-      state.page = 1;
-      state.openKey = null;
+      renderSubtypeBubbles();
       renderList();
     });
 
@@ -981,7 +1271,10 @@
       renderList();
     });
 
-    setActivePage("resources");
+    fillTypeFilter();
+    fillAuthorFilter();
+    setActivePage("about");
+    renderSubtypeBubbles();
     renderList();
   </script>
 </body>
