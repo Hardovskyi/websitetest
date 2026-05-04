@@ -151,7 +151,7 @@
     }
 
     .item {
-      padding: 28px 0 32px;
+      padding: 28px 0 24px;
       border-bottom: 1px solid rgba(8, 52, 82, 0.08);
     }
 
@@ -164,26 +164,70 @@
       margin-bottom: 8px;
     }
 
-    .title {
+    .title-button {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      width: 100%;
+      padding: 0;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .title-text {
       display: inline-block;
       font-family: "League Spartan", Arial, sans-serif;
       font-size: clamp(25px, 3.2vw, 31px);
       line-height: 1.18;
       font-weight: 700;
-      text-decoration: none;
       color: var(--navy);
-      margin-bottom: 12px;
+      transition: color 0.2s ease;
     }
 
-    .title:hover {
+    .title-button:hover .title-text {
       color: var(--orange);
+    }
+
+    .toggle-icon {
+      flex: 0 0 auto;
+      margin-top: 4px;
+      color: var(--orange);
+      font-family: "League Spartan", Arial, sans-serif;
+      font-size: 24px;
+      line-height: 1;
+      transition: transform 0.2s ease;
+    }
+
+    .title-button[aria-expanded="true"] .toggle-icon {
+      transform: rotate(45deg);
     }
 
     .date {
       font-family: "League Spartan", Arial, sans-serif;
       font-size: 18px;
       color: var(--orange);
-      margin-bottom: 10px;
+      margin: 10px 0 0;
+    }
+
+    .details {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.28s ease, margin-top 0.28s ease;
+      margin-top: 0;
+    }
+
+    .details.open {
+      max-height: 420px;
+      margin-top: 16px;
+    }
+
+    .details-inner {
+      background: var(--cream);
+      border-left: 4px solid var(--aqua);
+      padding: 16px 18px 14px;
     }
 
     .authors,
@@ -200,6 +244,24 @@
     .expertise strong {
       color: var(--navy);
       font-weight: 700;
+    }
+
+    .resource-link {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 10px 14px;
+      background: var(--orange);
+      color: white;
+      text-decoration: none;
+      font-family: "League Spartan", Arial, sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      transition: background 0.2s ease;
+    }
+
+    .resource-link:hover {
+      background: #d95c1a;
     }
 
     .pagination {
@@ -264,7 +326,11 @@
       }
 
       .item {
-        padding: 22px 0 26px;
+        padding: 22px 0 20px;
+      }
+
+      .details.open {
+        max-height: 520px;
       }
     }
   </style>
@@ -272,7 +338,7 @@
 <body>
   <main class="page">
     <header class="page-header">
-      <div class="eyebrow">Global Detroit Resource Library</div>
+      <div class="eyebrow">E Pluribus Research Library</div>
       <h1>All research and evidence</h1>
       <p class="intro">
         Research, reports, and practical resources on immigrant inclusion, workforce development, local economies, and thriving communities.
@@ -397,6 +463,7 @@
       author: "",
       page: 1,
       perPage: 8,
+      openKey: null,
     };
 
     const searchInput = document.getElementById("searchInput");
@@ -460,19 +527,42 @@
       if (!visible.length) {
         list.innerHTML = `<div class="empty">No resources match the current search and filter combination.</div>`;
       } else {
-        list.innerHTML = visible.map(item => `
-          <article class="item">
-            <div class="type">${item.type}</div>
-            <a class="title" href="${item.url}" target="_blank" rel="noopener noreferrer">${item.title}</a>
-            <div class="date">${item.date}</div>
-            <div class="authors"><strong>Authors:</strong> ${item.authors}</div>
-            <div class="expertise"><strong>Expertise:</strong> ${item.expertise.join(", ")}</div>
-            <div class="summary">${item.summary}</div>
-          </article>
-        `).join("");
+        list.innerHTML = visible.map((item, index) => {
+          const key = `${start + index}`;
+          const isOpen = state.openKey === key;
+          return `
+            <article class="item">
+              <div class="type">${item.type}</div>
+              <button class="title-button" data-key="${key}" aria-expanded="${isOpen}">
+                <span class="title-text">${item.title}</span>
+                <span class="toggle-icon">+</span>
+              </button>
+              <div class="date">${item.date}</div>
+              <div class="details ${isOpen ? "open" : ""}">
+                <div class="details-inner">
+                  <div class="authors"><strong>Authors:</strong> ${item.authors}</div>
+                  <div class="expertise"><strong>Expertise:</strong> ${item.expertise.join(", ")}</div>
+                  <div class="summary">${item.summary}</div>
+                  <a class="resource-link" href="${item.url}" target="_blank" rel="noopener noreferrer">Open source</a>
+                </div>
+              </div>
+            </article>
+          `;
+        }).join("");
       }
 
+      attachToggleHandlers();
       renderPagination(totalPages, filtered.length);
+    }
+
+    function attachToggleHandlers() {
+      list.querySelectorAll(".title-button").forEach(button => {
+        button.addEventListener("click", () => {
+          const key = button.dataset.key;
+          state.openKey = state.openKey === key ? null : key;
+          renderList();
+        });
+      });
     }
 
     function renderPagination(totalPages, totalResults) {
@@ -501,6 +591,7 @@
       pagination.querySelectorAll("[data-page]").forEach(button => {
         button.addEventListener("click", () => {
           state.page = Number(button.dataset.page);
+          state.openKey = null;
           renderList();
         });
       });
@@ -509,6 +600,7 @@
         button.addEventListener("click", () => {
           if (button.dataset.action === "prev" && state.page > 1) state.page -= 1;
           if (button.dataset.action === "next") state.page += 1;
+          state.openKey = null;
           renderList();
         });
       });
@@ -517,24 +609,28 @@
     searchInput.addEventListener("input", e => {
       state.search = e.target.value.trim();
       state.page = 1;
+      state.openKey = null;
       renderList();
     });
 
     typeFilter.addEventListener("change", e => {
       state.type = e.target.value;
       state.page = 1;
+      state.openKey = null;
       renderList();
     });
 
     expertiseFilter.addEventListener("change", e => {
       state.expertise = e.target.value;
       state.page = 1;
+      state.openKey = null;
       renderList();
     });
 
     authorFilter.addEventListener("change", e => {
       state.author = e.target.value;
       state.page = 1;
+      state.openKey = null;
       renderList();
     });
 
