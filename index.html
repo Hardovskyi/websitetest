@@ -4,36 +4,72 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>All research and evidence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@500;700;800&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --text: #111111;
-      --muted: #5f5f5f;
-      --line: #dadada;
-      --blue: #1779c6;
-      --bg: #ffffff;
+      --navy: #083452;
+      --orange: #f26a21;
+      --teal: #4c9f7a;
+      --aqua: #8acddb;
+      --sand: #f2efe8;
+      --cream: #fbfaf7;
+      --text: #173042;
+      --muted: #5e6d78;
+      --line: #d6d2c9;
     }
 
     * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
+      font-family: "Merriweather", Georgia, serif;
       color: var(--text);
-      background: var(--bg);
+      background: var(--sand);
     }
 
     .page {
-      width: min(980px, calc(100vw - 32px));
+      width: min(1020px, calc(100vw - 32px));
       margin: 0 auto;
-      padding: 24px 0 48px;
+      padding: 28px 0 56px;
+    }
+
+    .page-header {
+      background: var(--navy);
+      color: white;
+      padding: 26px 28px 24px;
+      margin-bottom: 26px;
+      border-left: 8px solid var(--orange);
+      box-shadow: 0 6px 18px rgba(8, 52, 82, 0.12);
+    }
+
+    .eyebrow {
+      font-family: "League Spartan", Arial, sans-serif;
+      font-size: 15px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--aqua);
+      margin-bottom: 12px;
     }
 
     h1 {
-      margin: 0 0 28px;
-      font-size: clamp(40px, 6vw, 62px);
-      line-height: 0.95;
-      letter-spacing: -0.03em;
-      font-weight: 700;
+      margin: 0 0 10px;
+      font-family: "League Spartan", Arial, sans-serif;
+      font-size: clamp(42px, 6.2vw, 68px);
+      line-height: 0.96;
+      letter-spacing: -0.02em;
+      font-weight: 800;
+      color: white;
+      text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.18);
+    }
+
+    .intro {
+      margin: 0;
+      max-width: 760px;
+      color: rgba(255,255,255,0.95);
+      font-size: 15px;
+      line-height: 1.65;
     }
 
     .controls {
@@ -41,7 +77,7 @@
       grid-template-columns: 320px repeat(3, minmax(160px, 1fr));
       gap: 18px 22px;
       align-items: end;
-      margin-bottom: 40px;
+      margin-bottom: 34px;
     }
 
     .control {
@@ -51,8 +87,10 @@
     }
 
     .control label {
-      font-size: 14px;
-      color: var(--muted);
+      font-family: "League Spartan", Arial, sans-serif;
+      font-size: 15px;
+      color: var(--navy);
+      letter-spacing: 0.01em;
     }
 
     .search-wrap,
@@ -63,18 +101,27 @@
     input[type="search"],
     select {
       width: 100%;
-      height: 50px;
+      height: 52px;
       border: 1px solid var(--line);
       border-radius: 0;
-      background: #fff;
+      background: var(--cream);
       padding: 0 48px 0 16px;
-      font-size: 16px;
-      color: var(--text);
+      font-family: "League Spartan", Arial, sans-serif;
+      font-size: 18px;
+      color: var(--navy);
       appearance: none;
       outline: none;
+      box-shadow: inset 0 0 0 1px transparent;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
-    input[type="search"]::placeholder { color: #666; }
+    input[type="search"]::placeholder { color: #6f7780; }
+
+    input[type="search"]:focus,
+    select:focus {
+      border-color: var(--aqua);
+      box-shadow: inset 0 0 0 1px var(--aqua);
+    }
 
     .search-icon,
     .select-icon {
@@ -83,8 +130,9 @@
       top: 50%;
       transform: translateY(-50%);
       pointer-events: none;
-      color: var(--blue);
-      font-size: 20px;
+      color: var(--aqua);
+      font-size: 18px;
+      font-family: Arial, sans-serif;
     }
 
     .results-meta {
@@ -92,9 +140,10 @@
       justify-content: space-between;
       align-items: center;
       gap: 16px;
-      margin-bottom: 8px;
+      margin-bottom: 12px;
       color: var(--muted);
-      font-size: 14px;
+      font-family: "League Spartan", Arial, sans-serif;
+      font-size: 15px;
     }
 
     .list {
@@ -102,52 +151,55 @@
     }
 
     .item {
-      padding: 26px 0 30px;
-      border-bottom: 1px solid transparent;
+      padding: 28px 0 32px;
+      border-bottom: 1px solid rgba(8, 52, 82, 0.08);
     }
 
     .type {
-      font-size: 13px;
+      font-family: "League Spartan", Arial, sans-serif;
+      font-size: 14px;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: var(--muted);
-      margin-bottom: 6px;
+      letter-spacing: 0.06em;
+      color: var(--teal);
+      margin-bottom: 8px;
     }
 
     .title {
       display: inline-block;
-      font-size: clamp(24px, 3.1vw, 28px);
-      line-height: 1.22;
+      font-family: "League Spartan", Arial, sans-serif;
+      font-size: clamp(25px, 3.2vw, 31px);
+      line-height: 1.18;
       font-weight: 700;
       text-decoration: none;
-      color: var(--text);
-      margin-bottom: 10px;
+      color: var(--navy);
+      margin-bottom: 12px;
     }
 
     .title:hover {
-      color: var(--blue);
+      color: var(--orange);
     }
 
     .date {
-      font-size: 16px;
-      color: #444;
-      margin-bottom: 8px;
+      font-family: "League Spartan", Arial, sans-serif;
+      font-size: 18px;
+      color: var(--orange);
+      margin-bottom: 10px;
     }
 
     .authors,
     .expertise,
     .summary {
       max-width: 860px;
-      color: var(--muted);
+      color: var(--text);
       font-size: 15px;
-      line-height: 1.5;
+      line-height: 1.7;
       margin-bottom: 8px;
     }
 
-    .expertise strong,
-    .authors strong {
-      color: var(--text);
-      font-weight: 600;
+    .authors strong,
+    .expertise strong {
+      color: var(--navy);
+      font-weight: 700;
     }
 
     .pagination {
@@ -155,23 +207,25 @@
       justify-content: center;
       align-items: center;
       gap: 10px;
-      margin-top: 28px;
+      margin-top: 30px;
       flex-wrap: wrap;
     }
 
     .page-button {
-      min-width: 34px;
-      height: 34px;
+      min-width: 38px;
+      height: 38px;
       border: 1px solid transparent;
       background: transparent;
-      color: var(--blue);
-      font-size: 16px;
+      color: var(--navy);
+      font-family: "League Spartan", Arial, sans-serif;
+      font-size: 22px;
       cursor: pointer;
     }
 
     .page-button.active {
       border-color: var(--line);
-      color: var(--text);
+      background: var(--cream);
+      color: var(--orange);
     }
 
     .page-button:disabled {
@@ -186,12 +240,18 @@
     }
 
     .helper-note {
-      margin-top: 22px;
+      margin-top: 24px;
       color: var(--muted);
       font-size: 13px;
-      line-height: 1.55;
+      line-height: 1.65;
       border-top: 1px solid var(--line);
       padding-top: 16px;
+    }
+
+    code {
+      background: rgba(8, 52, 82, 0.06);
+      padding: 2px 6px;
+      border-radius: 4px;
     }
 
     @media (max-width: 860px) {
@@ -199,22 +259,29 @@
         grid-template-columns: 1fr;
       }
 
-      h1 {
-        margin-bottom: 22px;
+      .page-header {
+        padding: 22px 20px 20px;
       }
 
       .item {
-        padding: 20px 0 24px;
+        padding: 22px 0 26px;
       }
     }
   </style>
 </head>
 <body>
   <main class="page">
-    <h1>All research and evidence</h1>
+    <header class="page-header">
+      <div class="eyebrow">Global Detroit Resource Library</div>
+      <h1>All research and evidence</h1>
+      <p class="intro">
+        Research, reports, and practical resources on immigrant inclusion, workforce development, local economies, and thriving communities.
+      </p>
+    </header>
 
     <section class="controls" aria-label="Search and filters">
       <div class="control">
+        <label for="searchInput">Search</label>
         <div class="search-wrap">
           <input id="searchInput" type="search" placeholder="Search" aria-label="Search resources" />
           <span class="search-icon">⌕</span>
@@ -222,6 +289,7 @@
       </div>
 
       <div class="control">
+        <label for="typeFilter">Type</label>
         <div class="select-wrap">
           <select id="typeFilter" aria-label="Filter by type">
             <option value="">Filter by type</option>
@@ -231,6 +299,7 @@
       </div>
 
       <div class="control">
+        <label for="expertiseFilter">Expertise</label>
         <div class="select-wrap">
           <select id="expertiseFilter" aria-label="Filter by expertise">
             <option value="">Filter by expertise</option>
@@ -240,6 +309,7 @@
       </div>
 
       <div class="control">
+        <label for="authorFilter">Authors</label>
         <div class="select-wrap">
           <select id="authorFilter" aria-label="Authors">
             <option value="">Authors</option>
