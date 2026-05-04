@@ -646,8 +646,7 @@
             <button class="dropdown-item" data-type="Geographic Focus of the Publication">Geographic Focus of the Publication</button>
             <button class="dropdown-item" data-type="Publication Format">Publication Format</button>
             <button class="dropdown-item" data-type="Use Case">Use Case</button>
-            <button class="dropdown-item" data-type="Author Type">Author Type</button>
-          </div>
+            </div>
         </div>
         <button class="nav-tab" data-page="contact">Contact Us</button>
       </nav>
@@ -1067,6 +1066,7 @@
 
     function filterResources() {
       const filtered = resources.filter(item => {
+        const tagsForSelectedType = state.type === "All Resources" ? [] : (item.tags[state.type] || []);
         const allTags = Object.values(item.tags).flat();
         const haystack = [
           item.title,
@@ -1078,8 +1078,15 @@
 
         const matchesSearch = !state.search || haystack.includes(state.search.toLowerCase());
         const matchesAuthor = !state.author || item.authors === state.author;
-        const matchesType = state.type === "All Resources" || (item.tags[state.type] && item.tags[state.type].length > 0);
-        const matchesSubtype = state.type === "All Resources" || state.selectedSubtypes.length === 0 || item.tags[state.type].some(tag => state.selectedSubtypes.includes(tag));
+
+        if (state.type === "All Resources") {
+          return matchesSearch && matchesAuthor;
+        }
+
+        const matchesType = tagsForSelectedType.length > 0;
+        const matchesSubtype = state.selectedSubtypes.length === 0
+          ? true
+          : state.selectedSubtypes.some(subtype => tagsForSelectedType.includes(subtype));
 
         return matchesSearch && matchesAuthor && matchesType && matchesSubtype;
       });
