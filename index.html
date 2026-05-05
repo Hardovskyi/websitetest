@@ -204,14 +204,14 @@
     .search-row {
       margin-bottom: 16px;
       display: grid;
-      grid-template-columns: minmax(280px, 1fr) auto;
+      grid-template-columns: minmax(280px, 1fr) minmax(220px, 280px) auto;
       gap: 12px;
       align-items: end;
     }
 
     .controls {
       display: grid;
-      grid-template-columns: repeat(3, minmax(180px, 1fr));
+      grid-template-columns: repeat(4, minmax(180px, 1fr));
       gap: 18px 22px;
       align-items: end;
       margin-bottom: 18px;
@@ -676,7 +676,6 @@
             <button class="dropdown-item" data-type="Special Populations Covered">Special Populations Covered</button>
             <button class="dropdown-item" data-type="Publication Format">Publication Format</button>
             <button class="dropdown-item" data-type="Use Case">Use Case</button>
-            <button class="dropdown-item" data-type="Author Type">Author Type</button>
             </div>
         </div>
         <button class="nav-tab" data-page="contact">Contact Us</button>
@@ -700,6 +699,18 @@
           <div class="search-wrap">
             <input id="searchInput" type="search" placeholder="Search" aria-label="Search resources" />
             <span class="search-icon">⌕</span>
+          </div>
+        </div>
+        <div class="control">
+          <label for="sortFilter">Sort</label>
+          <div class="select-wrap">
+            <select id="sortFilter" aria-label="Sort resources">
+              <option value="year-desc">Sort by newest year</option>
+              <option value="title-asc">Sort alphabetically</option>
+              <option value="author-asc">Sort by author</option>
+              <option value="year-asc">Sort by oldest year</option>
+            </select>
+            <span class="select-icon">▼</span>
           </div>
         </div>
         <div class="search-actions">
@@ -746,18 +757,6 @@
           </div>
         </div>
 
-        <div class="control">
-          <label for="sortFilter">Sort</label>
-          <div class="select-wrap">
-            <select id="sortFilter" aria-label="Sort resources">
-              <option value="year-desc">Sort by newest year</option>
-              <option value="title-asc">Sort alphabetically</option>
-              <option value="author-asc">Sort by author</option>
-              <option value="year-asc">Sort by oldest year</option>
-            </select>
-            <span class="select-icon">▼</span>
-          </div>
-        </div>
       </section>
 
       <section id="subtypePanel" class="subtype-panel" aria-label="Subtype filters">
@@ -986,8 +985,7 @@
       "Economic Impact Areas",
       "Special Populations Covered",
       "Publication Format",
-      "Use Case",
-      "Author Type"
+      "Use Case"
     ];
 
     const pageContent = {
