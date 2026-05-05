@@ -297,6 +297,67 @@
       font-family: Arial, sans-serif;
     }
 
+    .multi-select {
+      position: relative;
+    }
+
+    .multi-select-button {
+      width: 100%;
+      height: 52px;
+      border: 1px solid var(--line);
+      border-radius: 0;
+      background: var(--cream);
+      padding: 0 48px 0 16px;
+      font-family: "League Spartan", Arial, sans-serif;
+      font-size: 18px;
+      color: var(--navy);
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .multi-select-button:focus {
+      border-color: var(--aqua);
+      box-shadow: inset 0 0 0 1px var(--aqua);
+      outline: none;
+    }
+
+    .multi-select-panel {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      z-index: 25;
+      border: 1px solid var(--line);
+      background: var(--white);
+      box-shadow: 0 10px 24px rgba(8, 52, 82, 0.12);
+      max-height: 240px;
+      overflow: auto;
+      display: none;
+      padding: 8px 10px;
+    }
+
+    .multi-select.open .multi-select-panel {
+      display: block;
+    }
+
+    .multi-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: "League Spartan", Arial, sans-serif;
+      font-size: 16px;
+      color: var(--navy);
+      padding: 6px 2px;
+      cursor: pointer;
+    }
+
+    .multi-option input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--orange);
+      margin: 0;
+    }
+
     .subtype-panel {
       margin-bottom: 28px;
       display: none;
@@ -729,31 +790,28 @@
 
         <div class="control">
           <label for="authorTypeFilter">Authors Type</label>
-          <div class="select-wrap">
-            <select id="authorTypeFilter" aria-label="Authors type">
-              <option value="">All author types</option>
-            </select>
+          <div class="multi-select" id="authorTypeFilter">
+            <button class="multi-select-button" type="button" aria-label="Authors type">All author types</button>
             <span class="select-icon">▼</span>
+            <div class="multi-select-panel"></div>
           </div>
         </div>
 
         <div class="control">
           <label for="demographicFilter">Demographic Analysis Included</label>
-          <div class="select-wrap">
-            <select id="demographicFilter" aria-label="Demographic analysis included">
-              <option value="">All demographic tags</option>
-            </select>
+          <div class="multi-select" id="demographicFilter">
+            <button class="multi-select-button" type="button" aria-label="Demographic analysis included">All demographic tags</button>
             <span class="select-icon">▼</span>
+            <div class="multi-select-panel"></div>
           </div>
         </div>
 
         <div class="control">
           <label for="geographicFilter">Geographic Focus of the Publication</label>
-          <div class="select-wrap">
-            <select id="geographicFilter" aria-label="Geographic focus of the publication">
-              <option value="">All geographies</option>
-            </select>
+          <div class="multi-select" id="geographicFilter">
+            <button class="multi-select-button" type="button" aria-label="Geographic focus of the publication">All geographies</button>
             <span class="select-icon">▼</span>
+            <div class="multi-select-panel"></div>
           </div>
         </div>
 
@@ -1015,9 +1073,9 @@
       search: "",
       type: "All Resources",
       selectedSubtypes: [],
-      authorType: "",
-      demographic: "",
-      geographic: "",
+      authorTypes: [],
+      demographics: [],
+      geographies: [],
       sort: "year-desc",
       page: 1,
       perPage: 8,
@@ -1031,6 +1089,12 @@
     const authorTypeFilter = document.getElementById("authorTypeFilter");
     const demographicFilter = document.getElementById("demographicFilter");
     const geographicFilter = document.getElementById("geographicFilter");
+    const authorTypeButton = authorTypeFilter.querySelector(".multi-select-button");
+    const demographicButton = demographicFilter.querySelector(".multi-select-button");
+    const geographicButton = geographicFilter.querySelector(".multi-select-button");
+    const authorTypePanel = authorTypeFilter.querySelector(".multi-select-panel");
+    const demographicPanel = demographicFilter.querySelector(".multi-select-panel");
+    const geographicPanel = geographicFilter.querySelector(".multi-select-panel");
     const sortFilter = document.getElementById("sortFilter");
     const list = document.getElementById("list");
     const pagination = document.getElementById("pagination");
@@ -1063,22 +1127,55 @@
       `).join("");
     }
 
+    function renderMultiSelect(panelEl, buttonEl, options, selectedValues, emptyLabel) {
+      const count = selectedValues.length;
+      buttonEl.textContent = count === 0 ? emptyLabel : `${count} selected`;
+      panelEl.innerHTML = options.map(value => `
+        <label class="multi-option">
+          <input type="checkbox" value="${value}" ${selectedValues.includes(value) ? "checked" : ""} />
+          <span>${value}</span>
+        </label>
+      `).join("");
+
+      panelEl.querySelectorAll('input[type="checkbox"]').forEach(input => {
+        input.addEventListener("change", () => {
+          const value = input.value;
+          if (input.checked) {
+            if (!selectedValues.includes(value)) selectedValues.push(value);
+          } else {
+            const index = selectedValues.indexOf(value);
+            if (index !== -1) selectedValues.splice(index, 1);
+          }
+          state.page = 1;
+          state.openKey = null;
+          renderMultiSelect(panelEl, buttonEl, options, selectedValues, emptyLabel);
+          renderList();
+        });
+      });
+    }
+
     function fillAuxiliaryFilters() {
-      const authorTypes = subtypeMap["Author Type"] || [];
-      const demographics = subtypeMap["Demographic Analysis Included"] || [];
-      const geographies = subtypeMap["Geographic Focus of the Publication"] || [];
-
-      authorTypeFilter.innerHTML = `<option value="">All author types</option>` + authorTypes.map(value => `
-        <option value="${value}" ${value === state.authorType ? "selected" : ""}>${value}</option>
-      `).join("");
-
-      demographicFilter.innerHTML = `<option value="">All demographic tags</option>` + demographics.map(value => `
-        <option value="${value}" ${value === state.demographic ? "selected" : ""}>${value}</option>
-      `).join("");
-
-      geographicFilter.innerHTML = `<option value="">All geographies</option>` + geographies.map(value => `
-        <option value="${value}" ${value === state.geographic ? "selected" : ""}>${value}</option>
-      `).join("");
+      renderMultiSelect(
+        authorTypePanel,
+        authorTypeButton,
+        subtypeMap["Author Type"] || [],
+        state.authorTypes,
+        "All author types"
+      );
+      renderMultiSelect(
+        demographicPanel,
+        demographicButton,
+        subtypeMap["Demographic Analysis Included"] || [],
+        state.demographics,
+        "All demographic tags"
+      );
+      renderMultiSelect(
+        geographicPanel,
+        geographicButton,
+        subtypeMap["Geographic Focus of the Publication"] || [],
+        state.geographies,
+        "All geographies"
+      );
     }
 
     function sortResources(items) {
@@ -1146,9 +1243,9 @@
         const itemAuthorTypes = item.tags["Author Type"] || [];
         const itemDemographics = item.tags["Demographic Analysis Included"] || [];
         const itemGeographies = item.tags["Geographic Focus of the Publication"] || [];
-        const matchesAuthorType = !state.authorType || itemAuthorTypes.includes(state.authorType);
-        const matchesDemographic = !state.demographic || itemDemographics.includes(state.demographic);
-        const matchesGeographic = !state.geographic || itemGeographies.includes(state.geographic);
+        const matchesAuthorType = state.authorTypes.length === 0 || state.authorTypes.some(value => itemAuthorTypes.includes(value));
+        const matchesDemographic = state.demographics.length === 0 || state.demographics.some(value => itemDemographics.includes(value));
+        const matchesGeographic = state.geographies.length === 0 || state.geographies.some(value => itemGeographies.includes(value));
 
         if (state.type === "All Resources") {
           return matchesSearch && matchesAuthorType && matchesDemographic && matchesGeographic;
@@ -1198,9 +1295,9 @@
       state.search = "";
       state.type = "All Resources";
       state.selectedSubtypes = [];
-      state.authorType = "";
-      state.demographic = "";
-      state.geographic = "";
+      state.authorTypes = [];
+      state.demographics = [];
+      state.geographies = [];
       state.sort = "year-desc";
       state.page = 1;
       state.openKey = null;
@@ -1329,6 +1426,9 @@
       if (!event.target.closest(".resources-menu")) {
         closeDropdown();
       }
+      if (!event.target.closest(".multi-select")) {
+        document.querySelectorAll(".multi-select").forEach(el => el.classList.remove("open"));
+      }
     });
 
     navTabs.forEach(tab => {
@@ -1354,25 +1454,14 @@
       renderList();
     });
 
-    authorTypeFilter.addEventListener("change", e => {
-      state.authorType = e.target.value;
-      state.page = 1;
-      state.openKey = null;
-      renderList();
-    });
-
-    demographicFilter.addEventListener("change", e => {
-      state.demographic = e.target.value;
-      state.page = 1;
-      state.openKey = null;
-      renderList();
-    });
-
-    geographicFilter.addEventListener("change", e => {
-      state.geographic = e.target.value;
-      state.page = 1;
-      state.openKey = null;
-      renderList();
+    [authorTypeFilter, demographicFilter, geographicFilter].forEach(filterEl => {
+      const button = filterEl.querySelector(".multi-select-button");
+      button.addEventListener("click", event => {
+        event.stopPropagation();
+        const willOpen = !filterEl.classList.contains("open");
+        document.querySelectorAll(".multi-select").forEach(el => el.classList.remove("open"));
+        filterEl.classList.toggle("open", willOpen);
+      });
     });
 
     sortFilter.addEventListener("change", e => {
