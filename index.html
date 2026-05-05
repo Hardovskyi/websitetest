@@ -203,6 +203,10 @@
 
     .search-row {
       margin-bottom: 16px;
+      display: grid;
+      grid-template-columns: minmax(280px, 1fr) auto;
+      gap: 12px;
+      align-items: end;
     }
 
     .controls {
@@ -217,6 +221,30 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
+    }
+
+    .search-actions {
+      display: flex;
+      align-items: end;
+      min-height: 52px;
+    }
+
+    .reset-button {
+      height: 52px;
+      padding: 0 16px;
+      border: 1px solid var(--line);
+      background: var(--white);
+      color: var(--navy);
+      font-family: "League Spartan", Arial, sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: border-color 0.2s ease, color 0.2s ease;
+    }
+
+    .reset-button:hover {
+      border-color: var(--orange);
+      color: var(--orange);
     }
 
     .control label,
@@ -603,6 +631,10 @@
     }
 
     @media (max-width: 760px) {
+      .search-row {
+        grid-template-columns: 1fr;
+      }
+
       .controls {
         grid-template-columns: 1fr;
       }
@@ -642,10 +674,9 @@
             <button class="dropdown-item" data-type="All Resources">All Resources</button>
             <button class="dropdown-item" data-type="Economic Impact Areas">Economic Impact Areas</button>
             <button class="dropdown-item" data-type="Special Populations Covered">Special Populations Covered</button>
-            <button class="dropdown-item" data-type="Demographic Analysis Included">Demographic Analysis Included</button>
-            <button class="dropdown-item" data-type="Geographic Focus of the Publication">Geographic Focus of the Publication</button>
             <button class="dropdown-item" data-type="Publication Format">Publication Format</button>
             <button class="dropdown-item" data-type="Use Case">Use Case</button>
+            <button class="dropdown-item" data-type="Author Type">Author Type</button>
             </div>
         </div>
         <button class="nav-tab" data-page="contact">Contact Us</button>
@@ -671,6 +702,9 @@
             <span class="search-icon">⌕</span>
           </div>
         </div>
+        <div class="search-actions">
+          <button id="resetFiltersButton" class="reset-button" type="button" aria-label="Reset all filters">Reset</button>
+        </div>
       </section>
 
       <section class="controls" aria-label="Filters and sorting">
@@ -683,10 +717,30 @@
         </div>
 
         <div class="control">
-          <label for="authorFilter">Authors</label>
+          <label for="authorTypeFilter">Authors Type</label>
           <div class="select-wrap">
-            <select id="authorFilter" aria-label="Authors">
-              <option value="">All authors</option>
+            <select id="authorTypeFilter" aria-label="Authors type">
+              <option value="">All author types</option>
+            </select>
+            <span class="select-icon">▼</span>
+          </div>
+        </div>
+
+        <div class="control">
+          <label for="demographicFilter">Demographic Analysis Included</label>
+          <div class="select-wrap">
+            <select id="demographicFilter" aria-label="Demographic analysis included">
+              <option value="">All demographic tags</option>
+            </select>
+            <span class="select-icon">▼</span>
+          </div>
+        </div>
+
+        <div class="control">
+          <label for="geographicFilter">Geographic Focus of the Publication</label>
+          <div class="select-wrap">
+            <select id="geographicFilter" aria-label="Geographic focus of the publication">
+              <option value="">All geographies</option>
             </select>
             <span class="select-icon">▼</span>
           </div>
@@ -931,8 +985,6 @@
       "All Resources",
       "Economic Impact Areas",
       "Special Populations Covered",
-      "Demographic Analysis Included",
-      "Geographic Focus of the Publication",
       "Publication Format",
       "Use Case",
       "Author Type"
@@ -965,7 +1017,9 @@
       search: "",
       type: "All Resources",
       selectedSubtypes: [],
-      author: "",
+      authorType: "",
+      demographic: "",
+      geographic: "",
       sort: "year-desc",
       page: 1,
       perPage: 8,
@@ -974,8 +1028,11 @@
     };
 
     const searchInput = document.getElementById("searchInput");
+    const resetFiltersButton = document.getElementById("resetFiltersButton");
     const typeFilter = document.getElementById("typeFilter");
-    const authorFilter = document.getElementById("authorFilter");
+    const authorTypeFilter = document.getElementById("authorTypeFilter");
+    const demographicFilter = document.getElementById("demographicFilter");
+    const geographicFilter = document.getElementById("geographicFilter");
     const sortFilter = document.getElementById("sortFilter");
     const list = document.getElementById("list");
     const pagination = document.getElementById("pagination");
@@ -1008,10 +1065,21 @@
       `).join("");
     }
 
-    function fillAuthorFilter() {
-      const authors = uniqueValues(resources.map(item => item.authors));
-      authorFilter.innerHTML = `<option value="">All authors</option>` + authors.map(author => `
-        <option value="${author}">${author}</option>
+    function fillAuxiliaryFilters() {
+      const authorTypes = subtypeMap["Author Type"] || [];
+      const demographics = subtypeMap["Demographic Analysis Included"] || [];
+      const geographies = subtypeMap["Geographic Focus of the Publication"] || [];
+
+      authorTypeFilter.innerHTML = `<option value="">All author types</option>` + authorTypes.map(value => `
+        <option value="${value}" ${value === state.authorType ? "selected" : ""}>${value}</option>
+      `).join("");
+
+      demographicFilter.innerHTML = `<option value="">All demographic tags</option>` + demographics.map(value => `
+        <option value="${value}" ${value === state.demographic ? "selected" : ""}>${value}</option>
+      `).join("");
+
+      geographicFilter.innerHTML = `<option value="">All geographies</option>` + geographies.map(value => `
+        <option value="${value}" ${value === state.geographic ? "selected" : ""}>${value}</option>
       `).join("");
     }
 
@@ -1077,10 +1145,15 @@
         ].join(" ").toLowerCase();
 
         const matchesSearch = !state.search || haystack.includes(state.search.toLowerCase());
-        const matchesAuthor = !state.author || item.authors === state.author;
+        const itemAuthorTypes = item.tags["Author Type"] || [];
+        const itemDemographics = item.tags["Demographic Analysis Included"] || [];
+        const itemGeographies = item.tags["Geographic Focus of the Publication"] || [];
+        const matchesAuthorType = !state.authorType || itemAuthorTypes.includes(state.authorType);
+        const matchesDemographic = !state.demographic || itemDemographics.includes(state.demographic);
+        const matchesGeographic = !state.geographic || itemGeographies.includes(state.geographic);
 
         if (state.type === "All Resources") {
-          return matchesSearch && matchesAuthor;
+          return matchesSearch && matchesAuthorType && matchesDemographic && matchesGeographic;
         }
 
         const matchesType = tagsForSelectedType.length > 0;
@@ -1088,7 +1161,7 @@
           ? true
           : state.selectedSubtypes.some(subtype => tagsForSelectedType.includes(subtype));
 
-        return matchesSearch && matchesAuthor && matchesType && matchesSubtype;
+        return matchesSearch && matchesAuthorType && matchesDemographic && matchesGeographic && matchesType && matchesSubtype;
       });
 
       return sortResources(filtered);
@@ -1120,6 +1193,25 @@
       renderSubtypeBubbles();
       setActivePage("resources");
       closeDropdown();
+      renderList();
+    }
+
+    function resetFilters() {
+      state.search = "";
+      state.type = "All Resources";
+      state.selectedSubtypes = [];
+      state.authorType = "";
+      state.demographic = "";
+      state.geographic = "";
+      state.sort = "year-desc";
+      state.page = 1;
+      state.openKey = null;
+
+      searchInput.value = "";
+      sortFilter.value = "year-desc";
+      fillTypeFilter();
+      fillAuxiliaryFilters();
+      renderSubtypeBubbles();
       renderList();
     }
 
@@ -1264,8 +1356,22 @@
       renderList();
     });
 
-    authorFilter.addEventListener("change", e => {
-      state.author = e.target.value;
+    authorTypeFilter.addEventListener("change", e => {
+      state.authorType = e.target.value;
+      state.page = 1;
+      state.openKey = null;
+      renderList();
+    });
+
+    demographicFilter.addEventListener("change", e => {
+      state.demographic = e.target.value;
+      state.page = 1;
+      state.openKey = null;
+      renderList();
+    });
+
+    geographicFilter.addEventListener("change", e => {
+      state.geographic = e.target.value;
       state.page = 1;
       state.openKey = null;
       renderList();
@@ -1278,8 +1384,10 @@
       renderList();
     });
 
+    resetFiltersButton.addEventListener("click", resetFilters);
+
     fillTypeFilter();
-    fillAuthorFilter();
+    fillAuxiliaryFilters();
     setActivePage("about");
     renderSubtypeBubbles();
     renderList();
