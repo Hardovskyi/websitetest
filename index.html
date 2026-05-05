@@ -202,12 +202,34 @@
     }
 
     .search-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: end;
       margin-bottom: 16px;
     }
 
+    .reset-button {
+      height: 52px;
+      border: 1px solid var(--orange);
+      background: var(--orange);
+      color: white;
+      padding: 0 18px;
+      font-family: "League Spartan", Arial, sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .reset-button:hover {
+      background: #d95c1a;
+      border-color: #d95c1a;
+    }
+    
     .controls {
       display: grid;
-      grid-template-columns: repeat(3, minmax(180px, 1fr));
+      grid-template-columns: repeat(5, minmax(150px, 1fr));
       gap: 18px 22px;
       align-items: end;
       margin-bottom: 18px;
@@ -641,8 +663,6 @@
           <div class="resource-dropdown" id="resourcesDropdown">
             <button class="dropdown-item" data-type="All Resources">All Resources</button>
             <button class="dropdown-item" data-type="Economic Impact Areas">Economic Impact Areas</button>
-            <button class="dropdown-item" data-type="Special Populations Covered">Special Populations Covered</button>
-            <button class="dropdown-item" data-type="Demographic Analysis Included">Demographic Analysis Included</button>
             <button class="dropdown-item" data-type="Geographic Focus of the Publication">Geographic Focus of the Publication</button>
             <button class="dropdown-item" data-type="Publication Format">Publication Format</button>
             <button class="dropdown-item" data-type="Use Case">Use Case</button>
@@ -671,6 +691,8 @@
             <span class="search-icon">⌕</span>
           </div>
         </div>
+
+        <button class="reset-button" id="resetButton" type="button">Reset filters</button>
       </section>
 
       <section class="controls" aria-label="Filters and sorting">
@@ -682,29 +704,52 @@
           </div>
         </div>
 
-        <div class="control">
-          <label for="authorFilter">Authors</label>
-          <div class="select-wrap">
-            <select id="authorFilter" aria-label="Authors">
-              <option value="">All authors</option>
-            </select>
-            <span class="select-icon">▼</span>
-          </div>
-        </div>
+<section class="controls" aria-label="Filters and sorting">
+  <div class="control">
+    <label for="typeFilter">Type</label>
+    <div class="select-wrap">
+      <select id="typeFilter" aria-label="Filter by type"></select>
+      <span class="select-icon">▼</span>
+    </div>
+  </div>
 
-        <div class="control">
-          <label for="sortFilter">Sort</label>
-          <div class="select-wrap">
-            <select id="sortFilter" aria-label="Sort resources">
-              <option value="year-desc">Sort by newest year</option>
-              <option value="title-asc">Sort alphabetically</option>
-              <option value="author-asc">Sort by author</option>
-              <option value="year-asc">Sort by oldest year</option>
-            </select>
-            <span class="select-icon">▼</span>
-          </div>
-        </div>
-      </section>
+  <div class="control">
+    <label for="authorTypeFilter">Author Type</label>
+    <div class="select-wrap">
+      <select id="authorTypeFilter" aria-label="Author Type"></select>
+      <span class="select-icon">▼</span>
+    </div>
+  </div>
+
+  <div class="control">
+    <label for="demographicFilter">Demographic Analysis</label>
+    <div class="select-wrap">
+      <select id="demographicFilter" aria-label="Demographic Analysis"></select>
+      <span class="select-icon">▼</span>
+    </div>
+  </div>
+
+  <div class="control">
+    <label for="geographicFilter">Geographic Focus</label>
+    <div class="select-wrap">
+      <select id="geographicFilter" aria-label="Geographic Focus"></select>
+      <span class="select-icon">▼</span>
+    </div>
+  </div>
+
+  <div class="control">
+    <label for="sortFilter">Sort</label>
+    <div class="select-wrap">
+      <select id="sortFilter" aria-label="Sort resources">
+        <option value="year-desc">Sort by newest year</option>
+        <option value="title-asc">Sort alphabetically</option>
+        <option value="author-asc">Sort by author</option>
+        <option value="year-asc">Sort by oldest year</option>
+      </select>
+      <span class="select-icon">▼</span>
+    </div>
+  </div>
+</section>
 
       <section id="subtypePanel" class="subtype-panel" aria-label="Subtype filters">
         <div class="subtype-label">Subtypes</div>
@@ -931,11 +976,8 @@
       "All Resources",
       "Economic Impact Areas",
       "Special Populations Covered",
-      "Demographic Analysis Included",
-      "Geographic Focus of the Publication",
       "Publication Format",
-      "Use Case",
-      "Author Type"
+      "Use Case"
     ];
 
     const pageContent = {
@@ -965,7 +1007,9 @@
       search: "",
       type: "All Resources",
       selectedSubtypes: [],
-      author: "",
+      authorType: "",
+      demographic: "",
+      geographic: "",
       sort: "year-desc",
       page: 1,
       perPage: 8,
@@ -975,8 +1019,11 @@
 
     const searchInput = document.getElementById("searchInput");
     const typeFilter = document.getElementById("typeFilter");
-    const authorFilter = document.getElementById("authorFilter");
+    const authorTypeFilter = document.getElementById("authorTypeFilter");
+    const demographicFilter = document.getElementById("demographicFilter");
+    const geographicFilter = document.getElementById("geographicFilter");
     const sortFilter = document.getElementById("sortFilter");
+    const resetButton = document.getElementById("resetButton");
     const list = document.getElementById("list");
     const pagination = document.getElementById("pagination");
     const resultsCount = document.getElementById("resultsCount");
@@ -1008,11 +1055,16 @@
       `).join("");
     }
 
-    function fillAuthorFilter() {
-      const authors = uniqueValues(resources.map(item => item.authors));
-      authorFilter.innerHTML = `<option value="">All authors</option>` + authors.map(author => `
-        <option value="${author}">${author}</option>
+    function fillSelectWithOptions(select, defaultLabel, values, selectedValue = "") {
+      select.innerHTML = `<option value="">${defaultLabel}</option>` + values.map(value => `
+        <option value="${value}" ${value === selectedValue ? "selected" : ""}>${value}</option>
       `).join("");
+    }
+
+    function fillSecondaryFilters() {
+      fillSelectWithOptions(authorTypeFilter, "All author types", subtypeMap["Author Type"], state.authorType);
+      fillSelectWithOptions(demographicFilter, "All demographic analysis", subtypeMap["Demographic Analysis Included"], state.demographic);
+      fillSelectWithOptions(geographicFilter, "All geographic focus", subtypeMap["Geographic Focus of the Publication"], state.geographic);
     }
 
     function sortResources(items) {
@@ -1064,35 +1116,56 @@
       });
     }
 
-    function filterResources() {
-      const filtered = resources.filter(item => {
-        const tagsForSelectedType = state.type === "All Resources" ? [] : (item.tags[state.type] || []);
-        const allTags = Object.values(item.tags).flat();
-        const haystack = [
-          item.title,
-          item.authors,
-          item.summary,
-          item.date,
-          ...allTags
-        ].join(" ").toLowerCase();
+function filterResources() {
+  const filtered = resources.filter(item => {
+    const tagsForSelectedType = state.type === "All Resources" ? [] : (item.tags[state.type] || []);
+    const allTags = Object.values(item.tags).flat();
 
-        const matchesSearch = !state.search || haystack.includes(state.search.toLowerCase());
-        const matchesAuthor = !state.author || item.authors === state.author;
+    const haystack = [
+      item.title,
+      item.authors,
+      item.summary,
+      item.date,
+      ...allTags
+    ].join(" ").toLowerCase();
 
-        if (state.type === "All Resources") {
-          return matchesSearch && matchesAuthor;
-        }
+    const matchesSearch = !state.search || haystack.includes(state.search.toLowerCase());
 
-        const matchesType = tagsForSelectedType.length > 0;
-        const matchesSubtype = state.selectedSubtypes.length === 0
-          ? true
-          : state.selectedSubtypes.some(subtype => tagsForSelectedType.includes(subtype));
+    const matchesAuthorType =
+      !state.authorType ||
+      (item.tags["Author Type"] || []).includes(state.authorType);
 
-        return matchesSearch && matchesAuthor && matchesType && matchesSubtype;
-      });
+    const matchesDemographic =
+      !state.demographic ||
+      (item.tags["Demographic Analysis Included"] || []).includes(state.demographic);
 
-      return sortResources(filtered);
+    const matchesGeographic =
+      !state.geographic ||
+      (item.tags["Geographic Focus of the Publication"] || []).includes(state.geographic);
+
+    if (state.type === "All Resources") {
+      return matchesSearch && matchesAuthorType && matchesDemographic && matchesGeographic;
     }
+
+    const matchesType = tagsForSelectedType.length > 0;
+
+    const matchesSubtype =
+      state.selectedSubtypes.length === 0
+        ? true
+        : state.selectedSubtypes.some(subtype => tagsForSelectedType.includes(subtype));
+
+    return (
+      matchesSearch &&
+      matchesAuthorType &&
+      matchesDemographic &&
+      matchesGeographic &&
+      matchesType &&
+      matchesSubtype
+    );
+  });
+
+  return sortResources(filtered);
+}
 
     function setActivePage(page) {
       state.activePage = page;
@@ -1264,12 +1337,46 @@
       renderList();
     });
 
-    authorFilter.addEventListener("change", e => {
-      state.author = e.target.value;
-      state.page = 1;
-      state.openKey = null;
-      renderList();
-    });
+authorTypeFilter.addEventListener("change", e => {
+  state.authorType = e.target.value;
+  state.page = 1;
+  state.openKey = null;
+  renderList();
+});
+
+demographicFilter.addEventListener("change", e => {
+  state.demographic = e.target.value;
+  state.page = 1;
+  state.openKey = null;
+  renderList();
+});
+
+geographicFilter.addEventListener("change", e => {
+  state.geographic = e.target.value;
+  state.page = 1;
+  state.openKey = null;
+  renderList();
+});
+
+resetButton.addEventListener("click", () => {
+  state.search = "";
+  state.type = "All Resources";
+  state.selectedSubtypes = [];
+  state.authorType = "";
+  state.demographic = "";
+  state.geographic = "";
+  state.sort = "year-desc";
+  state.page = 1;
+  state.openKey = null;
+
+  searchInput.value = "";
+  sortFilter.value = "year-desc";
+
+  fillTypeFilter();
+  fillSecondaryFilters();
+  renderSubtypeBubbles();
+  renderList();
+});
 
     sortFilter.addEventListener("change", e => {
       state.sort = e.target.value;
@@ -1278,11 +1385,11 @@
       renderList();
     });
 
-    fillTypeFilter();
-    fillAuthorFilter();
-    setActivePage("about");
-    renderSubtypeBubbles();
-    renderList();
+fillTypeFilter();
+fillSecondaryFilters();
+setActivePage("about");
+renderSubtypeBubbles();
+renderList();
   </script>
 </body>
 </html>
